@@ -194,7 +194,7 @@ services:
             ru_RU: SMTP-порт Mailcatcher
 
 x-casaos:
-  id: com.penpot.penpot
+  id: com.lph.penpot
   architectures:
     - amd64
     - arm64

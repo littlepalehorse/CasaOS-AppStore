@@ -1,0 +1,285 @@
+name: penpot
+services:
+  penpot-frontend:
+    image: penpotapp/frontend:2.16
+    container_name: penpot-frontend
+    restart: unless-stopped
+    ports:
+      - target: 8080
+        published: "9001"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/assets
+        target: /opt/data/assets
+    depends_on:
+      - penpot-backend
+      - penpot-exporter
+      - penpot-mcp
+    network_mode: bridge
+    privileged: false
+    environment:
+      PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
+      PENPOT_PUBLIC_URI: http://localhost:9001
+      PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
+      PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
+    x-casaos:
+      ports:
+        - container: "8080"
+          description:
+            en_US: Penpot Web UI
+            ru_RU: Веб-интерфейс Penpot
+      volumes:
+        - container: /opt/data/assets
+          description:
+            en_US: Penpot user assets (images, exports, etc.)
+            ru_RU: Пользовательские ресурсы Penpot (изображения, экспорт и т.д.)
+      envs:
+        - container: PENPOT_FLAGS
+          description:
+            en_US: Penpot feature flags (e.g. disable-email-verification enable-smtp)
+            ru_RU: Флаги функций Penpot (например, disable-email-verification enable-smtp)
+        - container: PENPOT_PUBLIC_URI
+          description:
+            en_US: Public URI for Penpot (used for generated links)
+            ru_RU: Публичный URI Penpot (используется для генерации ссылок)
+
+  penpot-backend:
+    image: penpotapp/backend:2.16
+    container_name: penpot-backend
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/assets
+        target: /opt/data/assets
+    depends_on:
+      penpot-postgres:
+        condition: service_healthy
+      penpot-valkey:
+        condition: service_healthy
+    network_mode: bridge
+    privileged: false
+    environment:
+      PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
+      PENPOT_PUBLIC_URI: http://localhost:9001
+      PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
+      PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
+      PENPOT_SECRET_KEY: change-this-insecure-key
+      PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
+      PENPOT_DATABASE_USERNAME: penpot
+      PENPOT_DATABASE_PASSWORD: penpot
+      PENPOT_REDIS_URI: redis://penpot-valkey/0
+      PENPOT_OBJECTS_STORAGE_BACKEND: fs
+      PENPOT_OBJECTS_STORAGE_FS_DIRECTORY: /opt/data/assets
+      PENPOT_TELEMETRY_ENABLED: "true"
+      PENPOT_TELEMETRY_REFERER: compose
+      PENPOT_SMTP_DEFAULT_FROM: no-reply@example.com
+      PENPOT_SMTP_DEFAULT_REPLY_TO: no-reply@example.com
+      PENPOT_SMTP_HOST: penpot-mailcatch
+      PENPOT_SMTP_PORT: "1025"
+      PENPOT_SMTP_USERNAME: ""
+      PENPOT_SMTP_PASSWORD: ""
+      PENPOT_SMTP_TLS: "false"
+      PENPOT_SMTP_SSL: "false"
+    x-casaos:
+      volumes:
+        - container: /opt/data/assets
+          description:
+            en_US: Penpot user assets (shared with frontend)
+            ru_RU: Пользовательские ресурсы Penpot (общие с frontend)
+      envs:
+        - container: PENPOT_SECRET_KEY
+          description:
+            en_US: Master secret key for Penpot sessions and invitations. Generate with: python3 -c "import secrets; print(secrets.token_urlsafe(64))"
+            ru_RU: Мастер-ключ для сессий и приглашений Penpot. Сгенерируйте: python3 -c "import secrets; print(secrets.token_urlsafe(64))"
+        - container: PENPOT_DATABASE_PASSWORD
+          description:
+            en_US: PostgreSQL password for Penpot database
+            ru_RU: Пароль PostgreSQL для базы данных Penpot
+        - container: PENPOT_SMTP_HOST
+          description:
+            en_US: SMTP server host for sending emails
+            ru_RU: Хост SMTP-сервера для отправки писем
+        - container: PENPOT_SMTP_PORT
+          description:
+            en_US: SMTP server port
+            ru_RU: Порт SMTP-сервера
+        - container: PENPOT_SMTP_USERNAME
+          description:
+            en_US: SMTP authentication username
+            ru_RU: Имя пользователя для аутентификации SMTP
+        - container: PENPOT_SMTP_PASSWORD
+          description:
+            en_US: SMTP authentication password
+            ru_RU: Пароль для аутентификации SMTP
+        - container: PENPOT_SMTP_TLS
+          description:
+            en_US: Enable TLS for SMTP connection
+            ru_RU: Включить TLS для SMTP-соединения
+        - container: PENPOT_SMTP_SSL
+          description:
+            en_US: Enable SSL for SMTP connection
+            ru_RU: Включить SSL для SMTP-соединения
+        - container: PENPOT_FLAGS
+          description:
+            en_US: Penpot feature flags
+            ru_RU: Флаги функций Penpot
+
+  penpot-mcp:
+    image: penpotapp/mcp:2.16
+    container_name: penpot-mcp
+    restart: unless-stopped
+    network_mode: bridge
+    privileged: false
+
+  penpot-exporter:
+    image: penpotapp/exporter:2.16
+    container_name: penpot-exporter
+    restart: unless-stopped
+    depends_on:
+      penpot-valkey:
+        condition: service_healthy
+    network_mode: bridge
+    privileged: false
+    environment:
+      PENPOT_SECRET_KEY: change-this-insecure-key
+      PENPOT_PUBLIC_URI: http://localhost:9001
+      PENPOT_INTERNAL_URI: http://penpot-frontend:8080
+      PENPOT_REDIS_URI: redis://penpot-valkey/0
+
+  penpot-postgres:
+    image: postgres:15
+    container_name: penpot-postgres
+    restart: unless-stopped
+    stop_signal: SIGINT
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/postgres
+        target: /var/lib/postgresql/data
+    network_mode: bridge
+    privileged: false
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U penpot"]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+      start_period: 2s
+    environment:
+      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_DB: penpot
+      POSTGRES_USER: penpot
+      POSTGRES_PASSWORD: penpot
+    x-casaos:
+      volumes:
+        - container: /var/lib/postgresql/data
+          description:
+            en_US: PostgreSQL database data
+            ru_RU: Данные базы данных PostgreSQL
+
+  penpot-valkey:
+    image: valkey/valkey:8.1
+    container_name: penpot-valkey
+    restart: unless-stopped
+    network_mode: bridge
+    privileged: false
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+    environment:
+      VALKEY_EXTRA_FLAGS: "--maxmemory 128mb --maxmemory-policy volatile-lfu"
+
+  penpot-mailcatch:
+    image: sj26/mailcatcher:latest
+    container_name: penpot-mailcatch
+    restart: unless-stopped
+    expose:
+      - "1025"
+    ports:
+      - target: 1080
+        published: "1080"
+        protocol: tcp
+    network_mode: bridge
+    privileged: false
+    x-casaos:
+      ports:
+        - container: "1080"
+          description:
+            en_US: Mailcatcher web interface (temporal email viewer)
+            ru_RU: Веб-интерфейс Mailcatcher (временный просмотр писем)
+
+x-casaos:
+  id: com.penpot.penpot
+  architectures:
+    - amd64
+    - arm64
+  main: penpot-frontend
+  author: littlepalehorse
+  category: Productivity
+  description:
+    en_US: |
+      Penpot is the first open-source design and prototyping platform meant for cross-domain teams.
+
+      Penpot allows teams to design, prototype, and develop together in one place. It is browser-based, works with open standards (SVG, CSS, HTML), and runs on self-hosted infrastructure — giving you full control over your design data.
+
+      **Main Features:**
+      - Open-source design platform (SVG-based)
+      - Real-time collaboration for designers and developers
+      - Prototyping with interactions and animations
+      - Design tokens and variables for consistent branding
+      - Self-hosted — full data sovereignty
+      - Plugin system and MCP (Model Context Protocol) support
+
+      **Learn More:**
+      - [Penpot Official Website](https://penpot.app)
+      - [Penpot GitHub](https://github.com/penpot/penpot)
+      - [Penpot Documentation](https://help.penpot.app)
+    ru_RU: |
+      Penpot — первая open-source платформа для дизайна и прототипирования, созданная для кросс-функциональных команд.
+
+      Penpot позволяет командам совместно проектировать, создавать прототипы и разрабатывать интерфейс в одном месте. Работает в браузере, использует открытые стандарты (SVG, CSS, HTML) и запускается на собственном сервере — вы полностью контролируете свои данные.
+
+      **Основные Функции:**
+      - Open-source платформа для дизайна (на базе SVG)
+      - Совместная работа в реальном времени для дизайнеров и разработчиков
+      - Прототипирование с интеракциями и анимациями
+      - Design tokens и переменные для согласованного брендинга
+      - Self-hosted — полный контроль над данными
+      - Система плагинов и поддержка MCP (Model Context Protocol)
+
+      **Узнать Больше:**
+      - [Официальный сайт Penpot](https://penpot.app)
+      - [Penpot GitHub](https://github.com/penpot/penpot)
+      - [Документация Penpot](https://help.penpot.app)
+  developer: ULAB (Penpot)
+  icon: https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@main/Apps/Penpot/icon.svg
+  tagline:
+    en_US: Open-source design and prototyping platform for cross-domain teams.
+    ru_RU: Open-source платформа для дизайна и прототипирования.
+  title:
+    en_US: Penpot
+    ru_RU: Penpot
+  index: /
+  port_map: "9001"
+  scheme: http
+  version: "2.16"
+  update_at: "2025-06-07"
+  release_notes:
+    en_US: Initial release for CasaOS. Based on Penpot 2.16.
+    ru_RU: Первичный релиз для CasaOS. На базе Penpot 2.16.
+  website: "https://penpot.app"
+  repo: "https://github.com/penpot/penpot"
+  support: "https://github.com/penpot/penpot/issues"
+  docs: "https://help.penpot.app"
+  tips:
+    before_install:
+      en_US: |
+        **Important:** After first install, change `PENPOT_SECRET_KEY` and `PENPOT_DATABASE_PASSWORD` to secure values. The default key is insecure.
+
+        For production use, configure a real SMTP provider (the included mailcatcher is for testing only) and remove the `disable-email-verification` and `disable-secure-session-cookies` flags from `PENPOT_FLAGS`.
+      ru_RU: |
+        **Важно:** После первой установки измените `PENPOT_SECRET_KEY` и `PENPOT_DATABASE_PASSWORD` на безопасные значения. Значение по умолчанию небезопасно.
+
+        Для продакшена настройте реального SMTP-провайдера (встроенный mailcatcher только для тестов) и удалите флаги `disable-email-verification` и `disable-secure-session-cookies` из `PENPOT_FLAGS`.

@@ -242,8 +242,8 @@ x-casaos:
     en_US: Open-source design and prototyping platform for cross-domain teams.
     ru_RU: Open-source платформа для дизайна и прототипирования.
   title:
-    en_US: Penpot
-    ru_RU: Penpot
+    en_US: Penpot (LPH)
+    ru_RU: Penpot (LPH)
   index: /
   port_map: "9001"
   scheme: http

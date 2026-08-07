@@ -1,0 +1,32 @@
+{
+  "architectures": [
+    "amd64",
+    "arm64"
+  ],
+  "author": "littlepalehorse",
+  "category": "Productivity",
+  "description": "Penpot is the first open-source design and prototyping platform meant for cross-domain teams.\n\nPenpot allows teams to design, prototype, and develop together in one place. It is browser-based, works with open standards (SVG, CSS, HTML), and runs on self-hosted infrastructure — giving you full control over your design data.\n\n**Main Features:**\n- Open-source design platform (SVG-based)\n- Real-time collaboration for designers and developers\n- Prototyping with interactions and animations\n- Design tokens and variables for consistent branding\n- Self-hosted — full data sovereignty\n- Plugin system and MCP (Model Context Protocol) support\n\n**Learn More:**\n- [Penpot Official Website](https://penpot.app)\n- [Penpot GitHub](https://github.com/penpot/penpot)\n- [Penpot Documentation](https://help.penpot.app)\n",
+  "developer": "ULAB (Penpot)",
+  "tagline": "Open-source design and prototyping platform for cross-domain teams.",
+  "update_at": "2025-06-07",
+  "website": "https://penpot.app",
+  "repo": "https://github.com/penpot/penpot",
+  "support": "https://github.com/penpot/penpot/issues",
+  "docs": "https://help.penpot.app",
+  "tips": {
+    "before_install": "**Important:** After first install, change `PENPOT_SECRET_KEY` and `PENPOT_DATABASE_PASSWORD` to secure values. The default key is insecure.\n\nFor production use, configure a real SMTP provider (the included mailcatcher is for testing only) and remove the `disable-email-verification` and `disable-secure-session-cookies` flags from `PENPOT_FLAGS`.\n"
+  },
+  "title": "Penpot",
+  "release_note": "Initial release for CasaOS. Based on Penpot 2.16.",
+  "base_url": "https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@gh-pages",
+  "id": "com.penpot.penpot",
+  "version": "2.16.0",
+  "categories": [
+    "productivity"
+  ],
+  "min_memory": 0,
+  "min_image_size": {
+    "amd64": 1718117155,
+    "arm64": 1752904917
+  }
+}

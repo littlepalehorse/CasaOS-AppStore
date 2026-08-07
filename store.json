@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "store_id": "littlepalehorse-appstore",
+  "name": "Palehorse AppStore",
+  "description": "Experimental third-party app store for CasaOS with community-curated applications.",
+  "maintainer": "littlepalehorse",
+  "url": "https://github.com/littlepalehorse/CasaOS-AppStore"
+}

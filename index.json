@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "updated_at": "2026-08-07T10:26:01Z",
+  "app_count": 1,
+  "base_url": "https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@gh-pages",
+  "apps": [
+    {
+      "id": "com.penpot.penpot",
+      "title": "Penpot",
+      "tagline": "Open-source design and prototyping platform for cross-domain teams.",
+      "category": "Productivity",
+      "categories": [
+        "productivity"
+      ],
+      "author": "littlepalehorse",
+      "developer": "ULAB (Penpot)",
+      "architectures": [
+        "amd64",
+        "arm64"
+      ],
+      "icon": "/apps/com.penpot.penpot/assets/icon.svg",
+      "thumbnail": "",
+      "compose_url": "/apps/com.penpot.penpot/docker-compose.yml",
+      "meta_url": "/apps/com.penpot.penpot/meta.json",
+      "content_hash": "1108b69b",
+      "version": "2.16.0"
+    }
+  ]
+}

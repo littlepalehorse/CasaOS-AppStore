@@ -104,7 +104,7 @@ fetch_remote_file() {
 fetch_remote_file "scripts/build_appstore.py" "$REMOTE_BUILD_DIR/build_appstore.py"
 fetch_remote_file "requirements.txt" "$REMOTE_BUILD_DIR/requirements.txt"
 
-python3 -m pip install -r "$REMOTE_BUILD_DIR/requirements.txt"
+python3 -m pip install --break-system-packages -r "$REMOTE_BUILD_DIR/requirements.txt"
 
 CMD=(
   python3

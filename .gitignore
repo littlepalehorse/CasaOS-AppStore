@@ -6,3 +6,6 @@ out/
 # Temp build artifacts
 build_output.txt
 run_build.sh
+
+# Pip config
+pip.conf

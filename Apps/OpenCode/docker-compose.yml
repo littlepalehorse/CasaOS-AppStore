@@ -1,0 +1,94 @@
+name: opencode
+
+services:
+  opencode:
+    container_name: opencode
+    image: smanx/opencode:latest
+    restart: unless-stopped
+    ports:
+      - "4096:4096"
+    volumes:
+      - /DATA/AppData/$AppID/config:/root/.config/opencode
+      - /DATA/AppData/$AppID/data:/root/.local/share/opencode
+    environment:
+      - OPENCODE_PORT=4096
+      - OPENCODE_HOSTNAME=0.0.0.0
+      - OPENCODE_SERVER_USERNAME=admin
+      - OPENCODE_SERVER_PASSWORD=change-me
+    networks:
+      - opencode-net
+    x-casaos:
+      envs:
+        - container: OPENCODE_PORT
+          description:
+            en_US: 'Server port'
+            ru_RU: 'Порт сервера'
+        - container: OPENCODE_HOSTNAME
+          description:
+            en_US: 'Server hostname'
+            ru_RU: 'Хост сервера'
+        - container: OPENCODE_SERVER_USERNAME
+          description:
+            en_US: 'Basic auth username'
+            ru_RU: 'Имя пользователя для авторизации'
+        - container: OPENCODE_SERVER_PASSWORD
+          description:
+            en_US: 'Basic auth password'
+            ru_RU: 'Пароль для авторизации'
+      volumes:
+        - container: /root/.config/opencode
+          description:
+            en_US: 'OpenCode configuration files'
+            ru_RU: 'Файлы конфигурации OpenCode'
+        - container: /root/.local/share/opencode
+          description:
+            en_US: 'OpenCode data files'
+            ru_RU: 'Файлы данных OpenCode'
+      ports:
+        - container: "4096"
+          description:
+            en_US: 'OpenCode Web UI'
+            ru_RU: 'Веб-интерфейс OpenCode'
+
+networks:
+  opencode-net:
+    driver: bridge
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  id: com.lph.opencode
+  main: opencode
+  author: LittlePaleHorse
+  category: Developer
+  description:
+    en_US: |
+      OpenCode is an AI-powered coding assistant with a web interface. It helps you write, review, and manage code with AI assistance.
+
+      **Features:**
+      - AI-powered code generation and review
+      - Web-based interface
+      - Self-hosted and private
+      - Supports multiple AI providers
+    ru_RU: |
+      OpenCode — AI-ассистент для разработки с веб-интерфейсом. Помогает писать, ревьюить и управлять кодом с помощью ИИ.
+
+      **Возможности:**
+      - Генерация и ревью кода с помощью ИИ
+      - Веб-интерфейс
+      - Self-hosted и приватный
+      - Поддержка нескольких AI-провайдеров
+  developer: OpenCode
+  icon: https://raw.githubusercontent.com/smanx/opencode/master/assets/logo.png
+  tagline:
+    en_US: AI-powered coding assistant with web interface
+    ru_RU: AI-ассистент для разработки с веб-интерфейсом
+  title:
+    en_US: OpenCode
+    ru_RU: OpenCode
+  index: /
+  port_map: "4096"
+  scheme: http
+  website: "https://github.com/smanx/opencode"
+  repo: "https://github.com/smanx/opencode"

@@ -256,7 +256,7 @@ x-casaos:
   index: /
   port_map: "9001"
   scheme: http
-  version: "2.16"
+  version: "2.16.0"
   update_at: "2025-06-07"
   release_notes:
     en_US: Initial release for CasaOS. Based on Penpot 2.16.

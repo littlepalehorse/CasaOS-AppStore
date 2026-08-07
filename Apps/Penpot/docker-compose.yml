@@ -25,7 +25,7 @@ services:
       - penpot-mcp
     environment:
       PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
-      PENPOT_PUBLIC_URI: http://localhost:9001
+      PENPOT_PUBLIC_URI: http://penpot-frontend:8080
       PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
       PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
     x-casaos:
@@ -64,7 +64,7 @@ services:
       - penpot-redis
     environment:
       PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
-      PENPOT_PUBLIC_URI: http://localhost:9001
+      PENPOT_PUBLIC_URI: http://penpot-frontend:8080
       PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
       PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
       PENPOT_SECRET_KEY: change-this-insecure-key

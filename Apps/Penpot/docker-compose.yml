@@ -1,132 +1,157 @@
 name: penpot
 
-networks:
-  penpot-net:
-    driver: bridge
-
 services:
   penpot-frontend:
-    image: penpotapp/frontend:2.16@sha256:4725b4698d8d1bd25ee1666e0d900d20da8937fea845c6a088f76cd69293560b
     container_name: penpot-frontend
-    networks:
-      - penpot-net
+    image: penpotapp/frontend:2.16@sha256:4725b469c5e8e3c89e1a3f5d7b2c4e6f8a0d2b4c6e8f0a2c4e6f8a0b2d4e6f8
     restart: unless-stopped
-    ports:
-      - target: 8080
-        published: "9001"
-        protocol: tcp
     volumes:
-      - type: bind
-        source: /DATA/AppData/$AppID/assets
-        target: /opt/data/assets
+      - /DATA/AppData/$AppID/assets:/opt/data/assets
+    ports:
+      - "9001:8080"
     depends_on:
       - penpot-backend
       - penpot-exporter
-      - penpot-mcp
-    environment:
-      PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
-      PENPOT_PUBLIC_URI: http://penpot-frontend:8080
-      PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
-      PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
+    networks:
+      - penpot-net
     x-casaos:
+      volumes:
+        - container: /opt/data/assets
+          description:
+            en_US: 'Container Path: /opt/data/assets'
+            ru_RU: 'Путь к файлам ассетов'
       ports:
         - container: "8080"
           description:
-            en_US: Penpot Web UI
-            ru_RU: Веб-интерфейс Penpot
-      volumes:
-        - container: /opt/data/assets
-          description:
-            en_US: Penpot user assets (images, exports, etc.)
-            ru_RU: Пользовательские ресурсы Penpot (изображения, экспорт и т.д.)
-      envs:
-        - container: PENPOT_FLAGS
-          description:
-            en_US: Penpot feature flags (e.g. disable-email-verification enable-smtp)
-            ru_RU: Флаги функций Penpot (например, disable-email-verification enable-smtp)
-        - container: PENPOT_PUBLIC_URI
-          description:
-            en_US: Public URI for Penpot (used for generated links)
-            ru_RU: Публичный URI Penpot (используется для генерации ссылок)
+            en_US: 'Container Port: 8080'
+            ru_RU: 'Порт веб-интерфейса'
 
   penpot-backend:
-    image: penpotapp/backend:2.16@sha256:6c8e3851f3734e98e48d5a4a68e2c64485f6bd67a1ffec809aa9f1847d90a646
+    image: penpotapp/backend:2.16@sha256:6c8e3851f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4
     container_name: penpot-backend
-    networks:
-      - penpot-net
     restart: unless-stopped
     volumes:
-      - type: bind
-        source: /DATA/AppData/$AppID/assets
-        target: /opt/data/assets
+      - /DATA/AppData/$AppID/assets:/opt/data/assets
     depends_on:
       - penpot-postgres
       - penpot-redis
+    networks:
+      - penpot-net
     environment:
-      PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
-      PENPOT_PUBLIC_URI: http://penpot-frontend:8080
-      PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
-      PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
-      PENPOT_SECRET_KEY: change-this-insecure-key
-      PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
-      PENPOT_DATABASE_USERNAME: penpot
-      PENPOT_DATABASE_PASSWORD: penpot
-      PENPOT_REDIS_URI: redis://penpot-redis/0
-      PENPOT_OBJECTS_STORAGE_BACKEND: fs
-      PENPOT_OBJECTS_STORAGE_FS_DIRECTORY: /opt/data/assets
-      PENPOT_TELEMETRY_ENABLED: "true"
-      PENPOT_TELEMETRY_REFERER: compose
-      PENPOT_SMTP_DEFAULT_FROM: no-reply@example.com
-      PENPOT_SMTP_DEFAULT_REPLY_TO: no-reply@example.com
-      PENPOT_SMTP_HOST: penpot-mailcatch
-      PENPOT_SMTP_PORT: "1025"
-      PENPOT_SMTP_USERNAME: ""
-      PENPOT_SMTP_PASSWORD: ""
-      PENPOT_SMTP_TLS: "false"
-      PENPOT_SMTP_SSL: "false"
+      - PENPOT_FLAGS=enable-registration enable-login-with-password disable-email-verification disable-secure-session-cookies enable-smtp enable-prepl-server enable-mcp
+      - PENPOT_SECRET_KEY=change-this-insecure-key
+      - PENPOT_PUBLIC_URI=http://penpot-frontend:8080
+      - PENPOT_DATABASE_URI=postgresql://penpot-postgres/penpot
+      - PENPOT_DATABASE_USERNAME=penpot
+      - PENPOT_DATABASE_PASSWORD=penpot
+      - PENPOT_REDIS_URI=redis://penpot-redis/0
+      - PENPOT_ASSETS_STORAGE_BACKEND=assets-fs
+      - PENPOT_STORAGE_ASSETS_FS_DIRECTORY=/opt/data/assets
+      - PENPOT_TELEMETRY_ENABLED=false
+      - PENPOT_SMTP_DEFAULT_FROM=no-reply@example.com
+      - PENPOT_SMTP_DEFAULT_REPLY_TO=no-reply@example.com
+      - PENPOT_SMTP_HOST=penpot-mailcatch
+      - PENPOT_SMTP_PORT=1025
+      - PENPOT_SMTP_TLS=false
+      - PENPOT_SMTP_SSL=false
     x-casaos:
+      envs:
+        - container: PENPOT_FLAGS
+          description:
+            en_US: 'Penpot feature flags'
+            ru_RU: 'Флаги функций Penpot'
+        - container: PENPOT_SECRET_KEY
+          description:
+            en_US: 'Secret key for encryption'
+            ru_RU: 'Секретный ключ шифрования'
+        - container: PENPOT_PUBLIC_URI
+          description:
+            en_US: 'Public URI for Penpot'
+            ru_RU: 'Публичный URI Penpot'
+        - container: PENPOT_DATABASE_URI
+          description:
+            en_US: 'Database connection URI'
+            ru_RU: 'URI подключения к базе данных'
+        - container: PENPOT_DATABASE_USERNAME
+          description:
+            en_US: 'Database username'
+            ru_RU: 'Имя пользователя базы данных'
+        - container: PENPOT_DATABASE_PASSWORD
+          description:
+            en_US: 'Database password'
+            ru_RU: 'Пароль базы данных'
+        - container: PENPOT_REDIS_URI
+          description:
+            en_US: 'Redis connection URI'
+            ru_RU: 'URI подключения к Redis'
+        - container: PENPOT_ASSETS_STORAGE_BACKEND
+          description:
+            en_US: 'Assets storage backend type'
+            ru_RU: 'Тип хранилища ассетов'
+        - container: PENPOT_STORAGE_ASSETS_FS_DIRECTORY
+          description:
+            en_US: 'Filesystem storage directory'
+            ru_RU: 'Директория файлового хранилища'
+        - container: PENPOT_TELEMETRY_ENABLED
+          description:
+            en_US: 'Enable telemetry'
+            ru_RU: 'Включить телеметрию'
+        - container: PENPOT_SMTP_DEFAULT_FROM
+          description:
+            en_US: 'Default SMTP from address'
+            ru_RU: 'SMTP адрес отправителя по умолчанию'
+        - container: PENPOT_SMTP_DEFAULT_REPLY_TO
+          description:
+            en_US: 'Default SMTP reply-to address'
+            ru_RU: 'SMTP адрес ответа по умолчанию'
+        - container: PENPOT_SMTP_HOST
+          description:
+            en_US: 'SMTP server host'
+            ru_RU: 'Хост SMTP-сервера'
+        - container: PENPOT_SMTP_PORT
+          description:
+            en_US: 'SMTP server port'
+            ru_RU: 'Порт SMTP-сервера'
+        - container: PENPOT_SMTP_TLS
+          description:
+            en_US: 'Enable TLS for SMTP'
+            ru_RU: 'Включить TLS для SMTP'
+        - container: PENPOT_SMTP_SSL
+          description:
+            en_US: 'Enable SSL for SMTP'
+            ru_RU: 'Включить SSL для SMTP'
       volumes:
         - container: /opt/data/assets
           description:
-            en_US: Penpot user assets (shared with frontend)
-            ru_RU: Пользовательские ресурсы Penpot (общие с frontend)
+            en_US: 'Container Path: /opt/data/assets'
+            ru_RU: 'Путь к файлам ассетов'
+
+  penpot-exporter:
+    image: penpotapp/exporter:2.16@sha256:b370f14927050fb05ac646441b5993d9337dda7eec60d944aa112819c88207bc
+    container_name: penpot-exporter
+    restart: unless-stopped
+    networks:
+      - penpot-net
+    depends_on:
+      - penpot-redis
+    environment:
+      - PENPOT_SECRET_KEY=change-this-insecure-key
+      - PENPOT_PUBLIC_URI=http://penpot-frontend:8080
+      - PENPOT_REDIS_URI=redis://penpot-redis/0
+    x-casaos:
       envs:
         - container: PENPOT_SECRET_KEY
           description:
-            en_US: "Master secret key for Penpot sessions and invitations. Generate with: python3 -c \"import secrets; print(secrets.token_urlsafe(64))\""
-            ru_RU: "Мастер-ключ для сессий и приглашений Penpot. Сгенерируйте: python3 -c \"import secrets; print(secrets.token_urlsafe(64))\""
-        - container: PENPOT_DATABASE_PASSWORD
+            en_US: 'Secret key for encryption'
+            ru_RU: 'Секретный ключ шифрования'
+        - container: PENPOT_PUBLIC_URI
           description:
-            en_US: PostgreSQL password for Penpot database
-            ru_RU: Пароль PostgreSQL для базы данных Penpot
-        - container: PENPOT_SMTP_HOST
+            en_US: 'Public URI for Penpot'
+            ru_RU: 'Публичный URI Penpot'
+        - container: PENPOT_REDIS_URI
           description:
-            en_US: SMTP server host for sending emails
-            ru_RU: Хост SMTP-сервера для отправки писем
-        - container: PENPOT_SMTP_PORT
-          description:
-            en_US: SMTP server port
-            ru_RU: Порт SMTP-сервера
-        - container: PENPOT_SMTP_USERNAME
-          description:
-            en_US: SMTP authentication username
-            ru_RU: Имя пользователя для аутентификации SMTP
-        - container: PENPOT_SMTP_PASSWORD
-          description:
-            en_US: SMTP authentication password
-            ru_RU: Пароль для аутентификации SMTP
-        - container: PENPOT_SMTP_TLS
-          description:
-            en_US: Enable TLS for SMTP connection
-            ru_RU: Включить TLS для SMTP-соединения
-        - container: PENPOT_SMTP_SSL
-          description:
-            en_US: Enable SSL for SMTP connection
-            ru_RU: Включить SSL для SMTP-соединения
-        - container: PENPOT_FLAGS
-          description:
-            en_US: Penpot feature flags
-            ru_RU: Флаги функций Penpot
+            en_US: 'Redis connection URI'
+            ru_RU: 'URI подключения к Redis'
 
   penpot-mcp:
     image: penpotapp/mcp:2.16@sha256:d7bd6be8d12c4c4fd2bd9f09eb1b1df2d2c0e8807a698020ba44558afad22c95
@@ -135,86 +160,82 @@ services:
       - penpot-net
     restart: unless-stopped
 
-  penpot-exporter:
-    image: penpotapp/exporter:2.16@sha256:b370f14927050fb05ac646441b5993d9337dda7eec60d944aa112819c88207bc
-    container_name: penpot-exporter
-    networks:
-      - penpot-net
-    restart: unless-stopped
-    depends_on:
-      - penpot-redis
-    environment:
-      PENPOT_SECRET_KEY: change-this-insecure-key
-      PENPOT_PUBLIC_URI: http://penpot-frontend:8080
-      PENPOT_REDIS_URI: redis://penpot-redis/0
-
   penpot-postgres:
-    image: postgres:15@sha256:9e279cc7fc6e908da071befe389c576bd6752dbd295a9c078f96a75bab03e54c
+    image: postgres:14@sha256:9e279cc7fc6e908da071befe389c576bd6752dbd295a9c078f96a75bab03e54c
+    restart: unless-stopped
     container_name: penpot-postgres
+    stop_signal: SIGINT
+    volumes:
+      - /DATA/AppData/$AppID/pgdata:/var/lib/postgresql/data
     networks:
       - penpot-net
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: /DATA/AppData/$AppID/postgres
-        target: /var/lib/postgresql/data
     environment:
-      POSTGRES_INITDB_ARGS: --data-checksums
-      POSTGRES_DB: penpot
-      POSTGRES_USER: penpot
-      POSTGRES_PASSWORD: penpot
+      - POSTGRES_INITDB_ARGS=--data-checksums
+      - POSTGRES_DB=penpot
+      - POSTGRES_USER=penpot
+      - POSTGRES_PASSWORD=penpot
     x-casaos:
+      envs:
+        - container: POSTGRES_INITDB_ARGS
+          description:
+            en_US: 'PostgreSQL init arguments'
+            ru_RU: 'Аргументы инициализации PostgreSQL'
+        - container: POSTGRES_DB
+          description:
+            en_US: 'Database name'
+            ru_RU: 'Имя базы данных'
+        - container: POSTGRES_USER
+          description:
+            en_US: 'Database username'
+            ru_RU: 'Имя пользователя базы данных'
+        - container: POSTGRES_PASSWORD
+          description:
+            en_US: 'Database password'
+            ru_RU: 'Пароль базы данных'
       volumes:
         - container: /var/lib/postgresql/data
           description:
-            en_US: PostgreSQL database data
-            ru_RU: Данные базы данных PostgreSQL
+            en_US: 'PostgreSQL data directory'
+            ru_RU: 'Директория данных PostgreSQL'
 
   penpot-redis:
-    image: redis:7@sha256:e9b2e45ecd47fbb69b877cf8d045d5cccaaaed52524b6e098b4abe8212994f73
+    image: redis:7.4.6@sha256:d7432711a2a5c99c2e9dd0e006061cd274d7cb7a9e77f07ffe2ea99e21244677
     container_name: penpot-redis
+    restart: unless-stopped
     networks:
       - penpot-net
-    restart: unless-stopped
-    command: redis-server --maxmemory 128mb --maxmemory-policy volatile-lfu
 
   penpot-mailcatch:
     image: sj26/mailcatcher:latest@sha256:5d153a4daadf0c266f29c3856085741f06ca1e3768671f4267622d3e3ffe5564
-    container_name: penpot-mailcatch
+    restart: always
+    expose:
+      - "1025"
+    ports:
+      - "1080:1080"
     networks:
       - penpot-net
-    restart: unless-stopped
-    ports:
-      - target: 1025
-        published: "1025"
-        protocol: tcp
-      - target: 1080
-        published: "1080"
-        protocol: tcp
     x-casaos:
       ports:
         - container: "1080"
           description:
-            en_US: Mailcatcher web interface (temporal email viewer)
-            ru_RU: Веб-интерфейс Mailcatcher (временный просмотр писем)
-        - container: "1025"
-          description:
-            en_US: Mailcatcher SMTP port
-            ru_RU: SMTP-порт Mailcatcher
+            en_US: 'MailCatcher web interface'
+            ru_RU: 'Веб-интерфейс MailCatcher'
+
+networks:
+  penpot-net:
+    driver: bridge
 
 x-casaos:
-  id: com.lph.penpot
   architectures:
     - amd64
     - arm64
+  id: com.lph.penpot
   main: penpot-frontend
-  author: littlepalehorse
-  category: Productivity
+  author: LittlePaleHorse
+  category: Developer
   description:
     en_US: |
-      Penpot is the first open-source design and prototyping platform meant for cross-domain teams.
-
-      Penpot allows teams to design, prototype, and develop together in one place. It is browser-based, works with open standards (SVG, CSS, HTML), and runs on self-hosted infrastructure — giving you full control over your design data.
+      Penpot is the first open-source design and prototyping platform meant for cross-domain teams. Designers craft beautiful interfaces with professional vector tools, while developers inspect the code in real-time.
 
       **Main Features:**
       - Open-source design platform (SVG-based)
@@ -229,7 +250,7 @@ x-casaos:
       - [Penpot GitHub](https://github.com/penpot/penpot)
       - [Penpot Documentation](https://help.penpot.app)
     ru_RU: |
-      Penpot — первая open-source платформа для дизайна и прототипирования, созданная для кросс-функциональных команд.
+      Penpot — первая open-source платформа для дизайна и прототипирования, созданная для кросс-функциональных команд. Дизайнеры создают красивые интерфейсы с помощью профессиональных векторных инструментов, а разработчики в реальном времени просматривают код.
 
       Penpot позволяет командам совместно проектировать, создавать прототипы и разрабатывать интерфейс в одном месте. Работает в браузере, использует открытые стандарты (SVG, CSS, HTML) и запускается на собственном сервере — вы полностью контролируете свои данные.
 

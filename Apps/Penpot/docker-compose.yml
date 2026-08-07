@@ -6,7 +6,7 @@ networks:
 
 services:
   penpot-frontend:
-    image: penpotapp/frontend:2.16
+    image: penpotapp/frontend:2.16@sha256:4725b4698d8d1bd25ee1666e0d900d20da8937fea845c6a088f76cd69293560b
     container_name: penpot-frontend
     networks:
       - penpot-net
@@ -50,7 +50,7 @@ services:
             ru_RU: Публичный URI Penpot (используется для генерации ссылок)
 
   penpot-backend:
-    image: penpotapp/backend:2.16
+    image: penpotapp/backend:2.16@sha256:6c8e3851f3734e98e48d5a4a68e2c64485f6bd67a1ffec809aa9f1847d90a646
     container_name: penpot-backend
     networks:
       - penpot-net
@@ -61,7 +61,7 @@ services:
         target: /opt/data/assets
     depends_on:
       - penpot-postgres
-      - penpot-valkey
+      - penpot-redis
     environment:
       PENPOT_FLAGS: disable-email-verification enable-smtp enable-prepl-server disable-secure-session-cookies enable-mcp
       PENPOT_PUBLIC_URI: http://localhost:9001
@@ -71,7 +71,7 @@ services:
       PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
       PENPOT_DATABASE_USERNAME: penpot
       PENPOT_DATABASE_PASSWORD: penpot
-      PENPOT_REDIS_URI: redis://penpot-valkey/0
+      PENPOT_REDIS_URI: redis://penpot-redis/0
       PENPOT_OBJECTS_STORAGE_BACKEND: fs
       PENPOT_OBJECTS_STORAGE_FS_DIRECTORY: /opt/data/assets
       PENPOT_TELEMETRY_ENABLED: "true"
@@ -129,27 +129,27 @@ services:
             ru_RU: Флаги функций Penpot
 
   penpot-mcp:
-    image: penpotapp/mcp:2.16
+    image: penpotapp/mcp:2.16@sha256:d7bd6be8d12c4c4fd2bd9f09eb1b1df2d2c0e8807a698020ba44558afad22c95
     container_name: penpot-mcp
     networks:
       - penpot-net
     restart: unless-stopped
 
   penpot-exporter:
-    image: penpotapp/exporter:2.16
+    image: penpotapp/exporter:2.16@sha256:b370f14927050fb05ac646441b5993d9337dda7eec60d944aa112819c88207bc
     container_name: penpot-exporter
     networks:
       - penpot-net
     restart: unless-stopped
     depends_on:
-      - penpot-valkey
+      - penpot-redis
     environment:
       PENPOT_SECRET_KEY: change-this-insecure-key
       PENPOT_PUBLIC_URI: http://penpot-frontend:8080
-      PENPOT_REDIS_URI: redis://penpot-valkey/0
+      PENPOT_REDIS_URI: redis://penpot-redis/0
 
   penpot-postgres:
-    image: postgres:15
+    image: postgres:15@sha256:9e279cc7fc6e908da071befe389c576bd6752dbd295a9c078f96a75bab03e54c
     container_name: penpot-postgres
     networks:
       - penpot-net
@@ -170,17 +170,16 @@ services:
             en_US: PostgreSQL database data
             ru_RU: Данные базы данных PostgreSQL
 
-  penpot-valkey:
-    image: valkey/valkey:8.1
-    container_name: penpot-valkey
+  penpot-redis:
+    image: redis:7@sha256:e9b2e45ecd47fbb69b877cf8d045d5cccaaaed52524b6e098b4abe8212994f73
+    container_name: penpot-redis
     networks:
       - penpot-net
     restart: unless-stopped
-    environment:
-      VALKEY_EXTRA_FLAGS: "--maxmemory 128mb --maxmemory-policy volatile-lfu"
+    command: redis-server --maxmemory 128mb --maxmemory-policy volatile-lfu
 
   penpot-mailcatch:
-    image: sj26/mailcatcher:latest
+    image: sj26/mailcatcher:latest@sha256:5d153a4daadf0c266f29c3856085741f06ca1e3768671f4267622d3e3ffe5564
     container_name: penpot-mailcatch
     networks:
       - penpot-net

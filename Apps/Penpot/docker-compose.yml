@@ -1,11 +1,10 @@
 name: penpot
-networks:
-  penpot:
 
 services:
   penpot-frontend:
     image: penpotapp/frontend:2.16
     container_name: penpot-frontend
+    network_mode: bridge
     restart: unless-stopped
     ports:
       - target: 8080
@@ -24,8 +23,6 @@ services:
       PENPOT_PUBLIC_URI: http://localhost:9001
       PENPOT_HTTP_SERVER_MAX_BODY_SIZE: "367001600"
       PENPOT_HTTP_SERVER_MAX_MULTIPART_BODY_SIZE: "367001600"
-    networks:
-      - penpot
     x-casaos:
       ports:
         - container: "8080"
@@ -50,6 +47,7 @@ services:
   penpot-backend:
     image: penpotapp/backend:2.16
     container_name: penpot-backend
+    network_mode: bridge
     restart: unless-stopped
     volumes:
       - type: bind
@@ -80,8 +78,6 @@ services:
       PENPOT_SMTP_PASSWORD: ""
       PENPOT_SMTP_TLS: "false"
       PENPOT_SMTP_SSL: "false"
-    networks:
-      - penpot
     x-casaos:
       volumes:
         - container: /opt/data/assets
@@ -129,13 +125,13 @@ services:
   penpot-mcp:
     image: penpotapp/mcp:2.16
     container_name: penpot-mcp
+    network_mode: bridge
     restart: unless-stopped
-    networks:
-      - penpot
 
   penpot-exporter:
     image: penpotapp/exporter:2.16
     container_name: penpot-exporter
+    network_mode: bridge
     restart: unless-stopped
     depends_on:
       - penpot-valkey
@@ -144,12 +140,11 @@ services:
       PENPOT_PUBLIC_URI: http://localhost:9001
       PENPOT_INTERNAL_URI: http://penpot-frontend:8080
       PENPOT_REDIS_URI: redis://penpot-valkey/0
-    networks:
-      - penpot
 
   penpot-postgres:
     image: postgres:15
     container_name: penpot-postgres
+    network_mode: bridge
     restart: unless-stopped
     volumes:
       - type: bind
@@ -160,8 +155,6 @@ services:
       POSTGRES_DB: penpot
       POSTGRES_USER: penpot
       POSTGRES_PASSWORD: penpot
-    networks:
-      - penpot
     x-casaos:
       volumes:
         - container: /var/lib/postgresql/data
@@ -172,15 +165,15 @@ services:
   penpot-valkey:
     image: valkey/valkey:8.1
     container_name: penpot-valkey
+    network_mode: bridge
     restart: unless-stopped
     environment:
       VALKEY_EXTRA_FLAGS: "--maxmemory 128mb --maxmemory-policy volatile-lfu"
-    networks:
-      - penpot
 
   penpot-mailcatch:
     image: sj26/mailcatcher:latest
     container_name: penpot-mailcatch
+    network_mode: bridge
     restart: unless-stopped
     ports:
       - target: 1025
@@ -189,8 +182,6 @@ services:
       - target: 1080
         published: "1080"
         protocol: tcp
-    networks:
-      - penpot
     x-casaos:
       ports:
         - container: "1080"

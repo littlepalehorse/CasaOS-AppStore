@@ -1,10 +1,30 @@
 name: hermes-webui
 
 services:
+  hermes-agent:
+    container_name: hermes-agent
+    image: nousresearch/hermes-agent:latest
+    restart: unless-stopped
+    command: gateway run
+    volumes:
+      - /DATA/AppData/$AppID/hermes:/home/hermes/.hermes
+    environment:
+      - HERMES_HOME=/home/hermes/.hermes
+    networks:
+      - hermes-webui-net
+    x-casaos:
+      volumes:
+        - container: /home/hermes/.hermes
+          description:
+            en_US: 'Hermes config, sessions, memory, skills'
+            ru_RU: 'Конфиг, сессии, память, навыки Hermes'
+
   hermes-webui:
     container_name: hermes-webui
     image: ghcr.io/nesquena/hermes-webui:latest
     restart: unless-stopped
+    depends_on:
+      - hermes-agent
     ports:
       - "8787:8787"
     volumes:
@@ -16,6 +36,8 @@ services:
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
       - HERMES_WEBUI_DEFAULT_WORKSPACE=/workspace
       - HERMES_WEBUI_PASSWORD=
+      - HERMES_WEBUI_CHAT_BACKEND=gateway
+      - HERMES_API_URL=http://hermes-agent:8642
     networks:
       - hermes-webui-net
     x-casaos:
@@ -32,15 +54,15 @@ services:
           description:
             en_US: 'Password for remote access (leave empty for localhost only)'
             ru_RU: 'Пароль для удалённого доступа (пусто = только локально)'
-        - container: HERMES_WEBUI_DEFAULT_WORKSPACE
+        - container: HERMES_API_URL
           description:
-            en_US: 'Default workspace directory'
-            ru_RU: 'Директория рабочего пространства по умолчанию'
+            en_US: 'Hermes Gateway API URL'
+            ru_RU: 'URL API шлюза Hermes'
       volumes:
         - container: /home/hermeswebui/.hermes
           description:
-            en_US: 'Hermes config, sessions, memory, skills'
-            ru_RU: 'Конфиг, сессии, память, навыки Hermes'
+            en_US: 'Hermes shared data (config, sessions, memory)'
+            ru_RU: 'Общие данные Hermes (конфиг, сессии, память)'
         - container: /workspace
           description:
             en_US: 'Workspace files browsable from WebUI'
@@ -109,8 +131,8 @@ x-casaos:
   repo: "https://github.com/nesquena/hermes-webui"
   support: "https://github.com/nesquena/hermes-webui/issues"
   release_notes:
-    en_US: Initial release for CasaOS. Based on Hermes WebUI 0.52.192. Single-container setup — WebUI runs the agent in-process.
-    ru_RU: Первичный релиз для CasaOS. На базе Hermes WebUI 0.52.192. Один контейнер — WebUI запускает агент внутри себя.
+    en_US: Two-container setup: separate Hermes Agent (Gateway) + WebUI. Based on Hermes WebUI 0.52.192.
+    ru_RU: Двухконтейнерная схема: отдельный Hermes Agent (Gateway) + WebUI. На базе Hermes WebUI 0.52.192.
   tips:
     before_install:
       en_US: |

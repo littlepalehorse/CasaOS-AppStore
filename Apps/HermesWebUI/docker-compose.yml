@@ -1,0 +1,123 @@
+name: hermes-webui
+
+services:
+  hermes-webui:
+    container_name: hermes-webui
+    image: ghcr.io/nesquena/hermes-webui:latest
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      - /DATA/AppData/$AppID/hermes:/home/hermeswebui/.hermes
+      - /DATA/AppData/$AppID/workspace:/workspace
+    environment:
+      - HERMES_WEBUI_HOST=0.0.0.0
+      - HERMES_WEBUI_PORT=8787
+      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+      - HERMES_WEBUI_DEFAULT_WORKSPACE=/workspace
+      - HERMES_WEBUI_PASSWORD=
+    networks:
+      - hermes-webui-net
+    x-casaos:
+      envs:
+        - container: HERMES_WEBUI_HOST
+          description:
+            en_US: 'Bind address'
+            ru_RU: 'Адрес привязки сервера'
+        - container: HERMES_WEBUI_PORT
+          description:
+            en_US: 'Server port'
+            ru_RU: 'Порт сервера'
+        - container: HERMES_WEBUI_PASSWORD
+          description:
+            en_US: 'Password for remote access (leave empty for localhost only)'
+            ru_RU: 'Пароль для удалённого доступа (пусто = только локально)'
+        - container: HERMES_WEBUI_DEFAULT_WORKSPACE
+          description:
+            en_US: 'Default workspace directory'
+            ru_RU: 'Директория рабочего пространства по умолчанию'
+      volumes:
+        - container: /home/hermeswebui/.hermes
+          description:
+            en_US: 'Hermes config, sessions, memory, skills'
+            ru_RU: 'Конфиг, сессии, память, навыки Hermes'
+        - container: /workspace
+          description:
+            en_US: 'Workspace files browsable from WebUI'
+            ru_RU: 'Файлы рабочего пространства'
+      ports:
+        - container: "8787"
+          description:
+            en_US: 'Hermes WebUI'
+            ru_RU: 'Веб-интерфейс Hermes'
+
+networks:
+  hermes-webui-net:
+    driver: bridge
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  id: com.lph.hermes-webui
+  main: hermes-webui
+  author: LittlePaleHorse
+  category: Developer
+  description:
+    en_US: |
+      Hermes WebUI is a browser interface for Hermes Agent — an autonomous AI agent that lives on your server, remembers what it learns, and gets more capable the longer it runs.
+
+      **Features:**
+      - Persistent memory across sessions
+      - Self-hosted cron jobs with messaging (Telegram, Discord, Slack, etc.)
+      - Multi-provider model support (OpenAI, Anthropic, Google, Ollama, etc.)
+      - Self-improving skills system
+      - Workspace file browser with inline preview
+      - Session management with projects and tags
+      - Voice input, themes, PWA support
+      - 17.2k GitHub stars, very actively maintained
+
+      **First Run:** After install, open the WebUI and complete the onboarding wizard to configure your AI provider (API key or local model server).
+    ru_RU: |
+      Hermes WebUI — веб-интерфейс для Hermes Agent, автономного AI-агента, который живёт на вашем сервере, запоминает полученный опыт и становится лучше с каждой сессией.
+
+      **Возможности:**
+      - Постоянная память между сессиями
+      - Cron-задачи с отправкой в Telegram, Discord, Slack и др.
+      - Поддержка любых AI-провайдеров (OpenAI, Anthropic, Google, Ollama и др.)
+      - Система навыков с самообучением
+      - Браузер файлов рабочего пространства
+      - Управление сессиями, проекты, теги
+      - Голосовой ввод, темы, PWA
+      - 17.2k звёзд на GitHub, очень активная разработка
+
+      **Первый запуск:** После установки откройте WebUI и пройдите мастер настройки для подключения AI-провайдера (API-ключ или локальный сервер моделей).
+  developer: nesquena
+  icon: https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@main/Apps/HermesWebUI/icon.svg
+  tagline:
+    en_US: Autonomous AI agent with persistent memory, reachable from your browser.
+    ru_RU: Автономный AI-агент с постоянной памятью, доступный из браузера.
+  title:
+    en_US: Hermes WebUI
+    ru_RU: Hermes WebUI
+  index: /
+  port_map: "8787"
+  scheme: http
+  version: "0.52.192"
+  update_at: "2025-08-09"
+  website: "https://github.com/nesquena/hermes-webui"
+  repo: "https://github.com/nesquena/hermes-webui"
+  support: "https://github.com/nesquena/hermes-webui/issues"
+  release_notes:
+    en_US: Initial release for CasaOS. Based on Hermes WebUI 0.52.192. Single-container setup — WebUI runs the agent in-process.
+    ru_RU: Первичный релиз для CasaOS. На базе Hermes WebUI 0.52.192. Один контейнер — WebUI запускает агент внутри себя.
+  tips:
+    before_install:
+      en_US: |
+        **First run requires provider setup.** After installation, open the WebUI and configure at least one AI provider (OpenAI API key, Anthropic, Ollama, etc.) through the onboarding wizard.
+
+        For remote access, set `HERMES_WEBUI_PASSWORD` in the environment variables.
+      ru_RU: |
+        **При первом запуске нужно настроить провайдера.** После установки откройте WebUI и подключите хотя бы одного AI-провайдера через мастер настройки.
+
+        Для удалённого доступа установите `HERMES_WEBUI_PASSWORD` в переменных окружения.

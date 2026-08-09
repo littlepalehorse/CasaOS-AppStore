@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "updated_at": "2026-08-07T10:15:29Z",
+  "app_count": 2,
+  "base_url": "https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@gh-pages",
+  "apps": [
+    {
+      "id": "com.penpot.penpot",
+      "title": "Penpot",
+      "tagline": "Open-source design and prototyping platform for cross-domain teams.",
+      "category": "Productivity",
+      "categories": [
+        "productivity"
+      ],
+      "author": "littlepalehorse",
+      "developer": "ULAB (Penpot)",
+      "architectures": [
+        "amd64",
+        "arm64"
+      ],
+      "icon": "/apps/com.penpot.penpot/assets/icon.svg",
+      "thumbnail": "",
+      "compose_url": "/apps/com.penpot.penpot/docker-compose.yml",
+      "meta_url": "/apps/com.penpot.penpot/meta.json",
+      "content_hash": "66b6b744",
+      "version": "2.16.0"
+    },
+    {
+      "id": "com.lph.hermes-webui",
+      "title": "Hermes WebUI",
+      "tagline": "Autonomous AI agent with persistent memory, reachable from your browser.",
+      "category": "Developer",
+      "categories": ["developer"],
+      "author": "LittlePaleHorse",
+      "developer": "nesquena",
+      "architectures": ["amd64", "arm64"],
+      "icon": "/apps/com.lph.hermes-webui/assets/icon.svg",
+      "thumbnail": "",
+      "compose_url": "/apps/com.lph.hermes-webui/docker-compose.yml",
+      "meta_url": "/apps/com.lph.hermes-webui/meta.json",
+      "content_hash": "hermes01",
+      "version": "0.52.192"
+    }
+  ]
+}

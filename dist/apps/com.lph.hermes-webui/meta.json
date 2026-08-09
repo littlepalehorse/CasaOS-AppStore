@@ -1,0 +1,22 @@
+{
+  "version": "0.52.192",
+  "update_at": "2025-08-09",
+  "release_note": {
+    "en_US": "Two-container setup: separate Hermes Agent (Gateway) + WebUI. Based on Hermes WebUI 0.52.192.",
+    "ru_RU": "Двухконтейнерная схема: отдельный Hermes Agent (Gateway) + WebUI. На базе Hermes WebUI 0.52.192."
+  },
+  "website": "https://github.com/nesquena/hermes-webui",
+  "repo": "https://github.com/nesquena/hermes-webui",
+  "support": "https://github.com/nesquena/hermes-webui/issues",
+  "tagline": {
+    "en_US": "Autonomous AI agent with persistent memory, reachable from your browser.",
+    "ru_RU": "Автономный AI-агент с постоянной памятью, доступный из браузера."
+  },
+  "description": {
+    "en_US": "Hermes WebUI is a browser interface for Hermes Agent — an autonomous AI agent that lives on your server, remembers what it learns, and gets more capable the longer it runs.",
+    "ru_RU": "Hermes WebUI — веб-интерфейс для Hermes Agent, автономного AI-агента, который живёт на вашем сервере, запоминает полученный опыт и становится лучше с каждой сессией."
+  },
+  "author": "LittlePaleHorse",
+  "developer": "nesquena",
+  "architectures": ["amd64", "arm64"]
+}

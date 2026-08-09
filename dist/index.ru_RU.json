@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "id": "com.penpot.penpot",
+      "tagline": "Open-source платформа для дизайна и прототипирования.",
+      "title": "Penpot"
+    }
+  ]
+}

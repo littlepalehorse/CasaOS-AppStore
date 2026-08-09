@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#0076FF"/>
-  <text x="256" y="340" font-family="Arial, sans-serif" font-size="280" font-weight="bold" fill="white" text-anchor="middle">P</text>
+  <rect width="512" height="512" rx="80" fill="#00E599"/>
+  <path d="M140 140 h80 v240 h-80 z M220 140 h150 c60 0 100 40 100 100 c0 60 -40 100 -100 100 h-70 v-80 h70 c20 0 30 -10 30 -30 c0 -20 -10 -30 -30 -30 h-70 z" fill="white"/>
 </svg>

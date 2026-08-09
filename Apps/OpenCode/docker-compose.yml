@@ -80,7 +80,7 @@ x-casaos:
       - Self-hosted и приватный
       - Поддержка нескольких AI-провайдеров
   developer: OpenCode
-  icon: icon.svg
+  icon: https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@main/Apps/OpenCode/icon.svg
   tagline:
     en_US: AI-powered coding assistant with web interface
     ru_RU: AI-ассистент для разработки с веб-интерфейсом

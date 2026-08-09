@@ -137,9 +137,6 @@ x-casaos:
   website: "https://github.com/nesquena/hermes-webui"
   repo: "https://github.com/nesquena/hermes-webui"
   support: "https://github.com/nesquena/hermes-webui/issues"
-  release_notes:
-    en_US: Two-container setup: separate Hermes Agent (Gateway) + WebUI. Based on Hermes WebUI 0.52.192.
-    ru_RU: Двухконтейнерная схема: отдельный Hermes Agent (Gateway) + WebUI. На базе Hermes WebUI 0.52.192.
   tips:
     before_install:
       en_US: |

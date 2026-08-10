@@ -1,6 +1,15 @@
 name: hermes-webui
 
 services:
+  hermes-init:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-init
+    command: cp -a /opt/hermes /DATA/AppData/$AppID/hermes-agent-src/.
+    volumes:
+      - /DATA/AppData/$AppID/hermes-agent-src:/DATA/AppData/$AppID/hermes-agent-src
+    networks:
+      - hermes-net
+
   hermes-agent:
     container_name: hermes-agent
     image: nousresearch/hermes-agent:latest
@@ -10,9 +19,12 @@ services:
       - "8642:8642"
     volumes:
       - /DATA/AppData/$AppID/hermes:/home/hermes/.hermes
-      - hermes-agent-src:/opt/hermes
+      - /DATA/AppData/$AppID/hermes-agent-src:/opt/hermes:ro
     environment:
       - HERMES_HOME=/home/hermes/.hermes
+    depends_on:
+      hermes-init:
+        condition: service_completed_successfully
     networks:
       - hermes-net
     x-casaos:
@@ -32,12 +44,15 @@ services:
     image: ghcr.io/nesquena/hermes-webui:latest
     restart: unless-stopped
     depends_on:
-      - hermes-agent
+      hermes-agent:
+        condition: service_started
+      hermes-init:
+        condition: service_completed_successfully
     ports:
       - "8787:8787"
     volumes:
       - /DATA/AppData/$AppID/hermes:/home/hermeswebui/.hermes
-      - hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
+      - /DATA/AppData/$AppID/hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
       - /DATA/AppData/$AppID/workspace:/workspace
     environment:
       - HERMES_WEBUI_HOST=0.0.0.0

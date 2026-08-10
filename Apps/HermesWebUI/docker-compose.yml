@@ -21,10 +21,6 @@ services:
           description:
             en_US: 'Hermes data'
             ru_RU: 'Данные Hermes'
-        - container: /opt/hermes
-          description:
-            en_US: 'Hermes agent source (shared with WebUI)'
-            ru_RU: 'Исходный код Hermes agent'
       ports:
         - container: "8642"
           description:
@@ -75,10 +71,6 @@ services:
           description:
             en_US: 'Hermes shared data (config, sessions, memory)'
             ru_RU: 'Общие данные Hermes (конфиг, сессии, память)'
-        - container: /home/hermeswebui/.hermes/hermes-agent
-          description:
-            en_US: 'Hermes agent source (read-only, from agent container)'
-            ru_RU: 'Исходный код Hermes agent (только чтение)'
         - container: /workspace
           description:
             en_US: 'Workspace files browsable from WebUI'

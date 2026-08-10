@@ -85,9 +85,6 @@ networks:
   hermes-net:
     driver: bridge
 
-volumes:
-  hermes-agent-src:
-
 x-casaos:
   architectures:
     - amd64

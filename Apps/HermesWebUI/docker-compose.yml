@@ -1,58 +1,16 @@
 name: hermes-webui
 
 services:
-  hermes-init:
-    image: nousresearch/hermes-agent:latest
-    container_name: hermes-init
-    command: cp -a /opt/hermes /DATA/AppData/$AppID/hermes-agent-src/.
-    volumes:
-      - /DATA/AppData/$AppID/hermes-agent-src:/DATA/AppData/$AppID/hermes-agent-src
-    networks:
-      - hermes-net
-
-  hermes-agent:
-    container_name: hermes-agent
-    image: nousresearch/hermes-agent:latest
-    restart: unless-stopped
-    command: gateway run
-    ports:
-      - "8642:8642"
-    volumes:
-      - /DATA/AppData/$AppID/hermes:/home/hermes/.hermes
-      - /DATA/AppData/$AppID/hermes-agent-src:/opt/hermes:ro
-    environment:
-      - HERMES_HOME=/home/hermes/.hermes
-    depends_on:
-      hermes-init:
-        condition: service_completed_successfully
-    networks:
-      - hermes-net
-    x-casaos:
-      volumes:
-        - container: /home/hermes/.hermes
-          description:
-            en_US: 'Hermes data'
-            ru_RU: 'Данные Hermes'
-      ports:
-        - container: "8642"
-          description:
-            en_US: 'Hermes Gateway API'
-            ru_RU: 'API шлюз Hermes'
-
   hermes-webui:
     container_name: hermes-webui
     image: ghcr.io/nesquena/hermes-webui:latest
     restart: unless-stopped
-    depends_on:
-      hermes-agent:
-        condition: service_started
-      hermes-init:
-        condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8787:8787"
     volumes:
-      - /DATA/AppData/$AppID/hermes:/home/hermeswebui/.hermes
-      - /DATA/AppData/$AppID/hermes-agent-src:/home/hermeswebui/.hermes/hermes-agent:ro
+      - /home/user/.hermes:/home/hermeswebui/.hermes
       - /DATA/AppData/$AppID/workspace:/workspace
     environment:
       - HERMES_WEBUI_HOST=0.0.0.0
@@ -60,9 +18,7 @@ services:
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
       - HERMES_WEBUI_DEFAULT_WORKSPACE=/workspace
       - HERMES_WEBUI_PASSWORD=
-      - HERMES_API_URL=http://hermes-agent:8642
-    networks:
-      - hermes-net
+      - HERMES_API_URL=http://host.docker.internal:8642
     x-casaos:
       envs:
         - container: HERMES_WEBUI_HOST
@@ -82,10 +38,6 @@ services:
             en_US: 'Hermes Gateway API URL'
             ru_RU: 'URL API шлюза Hermes'
       volumes:
-        - container: /home/hermeswebui/.hermes
-          description:
-            en_US: 'Hermes shared data (config, sessions, memory)'
-            ru_RU: 'Общие данные Hermes (конфиг, сессии, память)'
         - container: /workspace
           description:
             en_US: 'Workspace files browsable from WebUI'
@@ -95,10 +47,6 @@ services:
           description:
             en_US: 'Hermes WebUI'
             ru_RU: 'Веб-интерфейс Hermes'
-
-networks:
-  hermes-net:
-    driver: bridge
 
 x-casaos:
   architectures:
@@ -122,7 +70,7 @@ x-casaos:
       - Voice input, themes, PWA support
       - 17.2k GitHub stars, very actively maintained
 
-      **First Run:** After install, open the WebUI and complete the onboarding wizard to configure your AI provider (API key or local model server).
+      **Prerequisite:** Hermes Agent must be installed on the host system first (see tips below).
     ru_RU: |
       Hermes WebUI — веб-интерфейс для Hermes Agent, автономного AI-агента, который живёт на вашем сервере, запоминает полученный опыт и становится лучше с каждой сессией.
 
@@ -136,7 +84,7 @@ x-casaos:
       - Голосовой ввод, темы, PWA
       - 17.2k звёзд на GitHub, очень активная разработка
 
-      **Первый запуск:** После установки откройте WebUI и пройдите мастер настройки для подключения AI-провайдера (API-ключ или локальный сервер моделей).
+      **Предварительное условие:** Hermes Agent должен быть установлен на хост-системе (см. подсказки ниже).
   developer: nesquena
   icon: https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@main/Apps/HermesWebUI/icon.svg
   tagline:
@@ -156,10 +104,38 @@ x-casaos:
   tips:
     before_install:
       en_US: |
-        **First run requires provider setup.** After installation, open the WebUI and configure at least one AI provider (OpenAI API key, Anthropic, Ollama, etc.) through the onboarding wizard.
+        **Hermes Agent must be installed on the host first.**
+
+        Run this command on your server:
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+        ```
+
+        Then start the gateway:
+        ```bash
+        hermes gateway run &
+        ```
+
+        **Home path:** This app uses `/home/user/.hermes`. If your username is different, edit `docker-compose.yml` and change the volume mount path.
+
+        **First run:** After installation, open the WebUI and configure at least one AI provider (OpenAI API key, Anthropic, Ollama, etc.) through the onboarding wizard.
 
         For remote access, set `HERMES_WEBUI_PASSWORD` in the environment variables.
       ru_RU: |
-        **При первом запуске нужно настроить провайдера.** После установки откройте WebUI и подключите хотя бы одного AI-провайдера через мастер настройки.
+        **Hermes Agent должен быть установлен на хосте.**
+
+        Выполните на сервере:
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+        ```
+
+        Затем запустите шлюз:
+        ```bash
+        hermes gateway run &
+        ```
+
+        **Путь к домашней папке:** Приложение использует `/home/user/.hermes`. Если ваше имя пользователя другое, измените путь в `docker-compose.yml`.
+
+        **Первый запуск:** После установки откройте WebUI и подключите хотя бы одного AI-провайдера через мастер настройки.
 
         Для удалённого доступа установите `HERMES_WEBUI_PASSWORD` в переменных окружения.

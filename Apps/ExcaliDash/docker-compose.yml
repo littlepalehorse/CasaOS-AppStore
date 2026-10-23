@@ -3,7 +3,7 @@ name: excalidash
 services:
   backend:
     container_name: excalidash-backend
-    image: zimengxiong/excalidash-backend:v0.6.6
+    image: zimengxiong/excalidash-backend:0.6.6
     init: true
     restart: unless-stopped
     environment:
@@ -54,7 +54,7 @@ services:
 
   frontend:
     container_name: excalidash-frontend
-    image: zimengxiong/excalidash-frontend:v0.6.6
+    image: zimengxiong/excalidash-frontend:0.6.6
     restart: unless-stopped
     ports:
       - "6767:8080"
@@ -124,7 +124,7 @@ x-casaos:
   index: /
   port_map: "6767"
   scheme: http
-  version: "v0.6.6"
+  version: "0.6.6"
   website: https://excalidash.xyz
   repo: https://github.com/ZimengXiong/ExcaliDash
   support: https://github.com/ZimengXiong/ExcaliDash/issues

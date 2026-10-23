@@ -1,0 +1,140 @@
+name: excalidash
+
+services:
+  backend:
+    container_name: excalidash-backend
+    image: zimengxiong/excalidash-backend:v0.6.6
+    init: true
+    restart: unless-stopped
+    environment:
+      - DATABASE_PROVIDER=sqlite
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - PORT=8000
+      - NODE_ENV=production
+      - AUTH_MODE=local
+      - FILE_UPLOAD_MAX_MB=100
+      - FRONTEND_URL=
+      - TRUST_PROXY=false
+    volumes:
+      - /DATA/AppData/$AppID/data:/app/prisma
+    networks:
+      - excalidash-network
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - require('http').get('http://127.0.0.1:8000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    x-casaos:
+      envs:
+        - container: AUTH_MODE
+          description:
+            en_US: 'Authentication mode: local, hybrid, or oidc_enforced'
+            ru_RU: 'Режим аутентификации: local, hybrid или oidc_enforced'
+        - container: FILE_UPLOAD_MAX_MB
+          description:
+            en_US: 'Maximum uploaded file size in MB'
+            ru_RU: 'Максимальный размер загружаемого файла в МБ'
+        - container: FRONTEND_URL
+          description:
+            en_US: 'Public frontend URL when using a reverse proxy'
+            ru_RU: 'Публичный URL интерфейса при использовании обратного прокси'
+        - container: TRUST_PROXY
+          description:
+            en_US: 'Trusted reverse proxy hop count; keep false without a trusted proxy'
+            ru_RU: 'Количество доверенных прокси; оставьте false без доверенного прокси'
+      volumes:
+        - container: /app/prisma
+          description:
+            en_US: 'SQLite database and uploaded files'
+            ru_RU: 'База SQLite и загруженные файлы'
+
+  frontend:
+    container_name: excalidash-frontend
+    image: zimengxiong/excalidash-frontend:v0.6.6
+    restart: unless-stopped
+    ports:
+      - "6767:8080"
+    depends_on:
+      - backend
+    networks:
+      - excalidash-network
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8080
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    x-casaos:
+      ports:
+        - container: "8080"
+          description:
+            en_US: 'ExcaliDash web interface'
+            ru_RU: 'Веб-интерфейс ExcaliDash'
+
+networks:
+  excalidash-network:
+    driver: bridge
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  id: com.lph.excalidash
+  main: frontend
+  author: LittlePaleHorse
+  category: Productivity
+  developer: ZimengXiong
+  description:
+    en_US: |
+      Self-hosted Excalidraw workspaces with collections, real-time collaboration, sharing, history, and backups.
+
+      **Features:**
+      - Save and organize drawings in workspaces and collections
+      - Collaborate in real time and share drawings
+      - Version history and backups
+      - Local authentication with optional OpenID Connect
+
+      **First run:** Create the administrator account in the setup wizard after opening the app.
+    ru_RU: |
+      Самостоятельно размещаемые рабочие пространства Excalidraw с коллекциями, совместной работой в реальном времени, обменом, историей и резервными копиями.
+
+      **Возможности:**
+      - Сохранение рисунков и организация их в рабочие пространства и коллекции
+      - Совместная работа в реальном времени и обмен рисунками
+      - История версий и резервные копии
+      - Локальная аутентификация с поддержкой OpenID Connect
+
+      **Первый запуск:** Создайте учётную запись администратора в мастере настройки после открытия приложения.
+  icon: https://cdn.jsdelivr.net/gh/littlepalehorse/CasaOS-AppStore@main/Apps/ExcaliDash/icon.svg
+  tagline:
+    en_US: Self-hosted Excalidraw workspaces with real-time collaboration
+    ru_RU: Самостоятельно размещаемые рабочие пространства Excalidraw с совместной работой
+  title:
+    en_US: ExcaliDash
+    ru_RU: ExcaliDash
+  index: /
+  port_map: "6767"
+  scheme: http
+  version: "v0.6.6"
+  website: https://excalidash.xyz
+  repo: https://github.com/ZimengXiong/ExcaliDash
+  support: https://github.com/ZimengXiong/ExcaliDash/issues
+  tips:
+    before_install:
+      en_US: |
+        ExcaliDash stores its SQLite database and uploaded files in `/DATA/AppData/$AppID/data`.
+
+        On first launch, open the web interface and create your administrator account. Keep the instance behind a trusted HTTPS reverse proxy if you expose it to the internet. Configure `FRONTEND_URL` and `TRUST_PROXY` on the backend when using a reverse proxy.
+      ru_RU: |
+        ExcaliDash хранит базу SQLite и загруженные файлы в `/DATA/AppData/$AppID/data`.
+
+        При первом запуске откройте веб-интерфейс и создайте учётную запись администратора. При публикации в интернете используйте доверенный HTTPS-прокси. При использовании обратного прокси настройте `FRONTEND_URL` и `TRUST_PROXY` для backend.
